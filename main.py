@@ -1,6 +1,6 @@
 import telebot
 from datetime import datetime
-from config import token, choose, events_soon
+from config import token, choose, events_soon, admin_chat_id
 from database import BotDB
 
 
@@ -38,8 +38,8 @@ def answer(call):
         video_games = telebot.types.InlineKeyboardButton(text="Компьютеры, Sony PC", callback_data="video_games")
         markup_reply.add(hookah, food_drink, events, table_games, service, video_games)
 
-        bot.send_message(call.message.chat.id, f"Спасибо, что выбираете нас! "\
-            f"Что вам нравится у нас больше всего?", reply_markup=markup_reply)
+        bot.send_message(call.message.chat.id, f"Спасибо, что выбираете нас! "
+                                               f"Что вам нравится у нас больше всего?", reply_markup=markup_reply)
 
     elif call.data == "no":
         bot.send_message(call.message.chat.id, f"🍃Ждем вас в гости, наш адрес:\n"
@@ -139,15 +139,49 @@ def other(message):
     status, event = "other", None
 
 
+@bot.message_handler(commands=["getchatid"])
+def chatid(message):
+    bot.send_message(message.chat.id, f"{message.chat.id}")
+
+
 @bot.message_handler(content_types=["contact"])
 def write_phone(message):
+    global status
     botdb.add_data(message.from_user.id, datetime.now(), status, message.contact.phone_number, event)
+    bot.send_message(message.chat.id, "Ваш ответ получен, спасибо!")
+    bot.send_message(admin_chat_id, f"user {message.from_user.first_name}\n"
+                                    f"status {status}\n"
+                                    f"phone {message.contact.phone_number}\n"
+                                    f"event {event}")
+    status = None
 
 
 @bot.message_handler(content_types=["text"])
 def get_text(message):
-    text = message.text
-    botdb.add_data(message.from_user.id, datetime.now(), status, text, event)
+    try:
+        global status
+        if "admin" in message.text:
+            to_chat_id, mess_text = message.text[6:].split("#")
+            bot.send_message(to_chat_id, mess_text)
+
+        if status is None:
+            bot.send_message(message.chat.id, "Что Вас интересует? Воспользуйтесь кнопкой Меню")
+
+        else:
+            text = message.text
+            botdb.add_data(message.from_user.id, datetime.now(), status, text, event)
+            bot.send_message(message.chat.id, "Ваш ответ получен, спасибо!")
+
+            bot.send_message(admin_chat_id, f"user {message.from_user.first_name}\n"
+                                            # f"user_id {message.from_user.username}\n"
+                                            f"chat {message.chat.id}\n"
+                                            f"status {status}\n"
+                                            f"text {text}\n"
+                                            f"event {event}")
+            status = None
+
+    except Exception:
+        bot.send_message(message.chat.id, "Что Вас интересует? Воспользуйтесь кнопкой Меню")
 
 
 if __name__ == "__main__":
