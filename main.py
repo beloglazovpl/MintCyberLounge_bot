@@ -67,7 +67,7 @@ def answer(call):
         button_phone = telebot.types.KeyboardButton(text="📱 Отправить номер телефона", request_contact=True)
         markup_reply.add(button_phone)
         bot.send_message(call.message.chat.id, f"Оставьте ваш номер телефона, мы скоро вам перезвоним и подтвердим бронь)\n"
-                                               f"(через сообщение, либо воспользовавшись формой ниже)", reply_markup=markup_reply)
+                                               f"(отправьте номер в сообщении, либо воспользуйтесь формой ниже)", reply_markup=markup_reply)
 
     elif call.data == "event_no":
         bot.send_message(call.message.chat.id, f"Если вам интересно что-то другое - нажмите на кнопку Меню в левом нижнем углу.\n"
@@ -91,7 +91,7 @@ def book_table(message):
     button_phone = telebot.types.KeyboardButton(text="📱 Отправить номер телефона", request_contact=True)
     markup_reply.add(button_phone)
     bot.send_message(message.chat.id, f"Оставьте ваш номер телефона, мы скоро вам перезвоним и подтвердим бронь)\n"
-                                      f"(через сообщение, либо воспользовавшись формой ниже)", reply_markup=markup_reply)
+                                      f"(отправьте номер в сообщении, либо воспользуйтесь формой ниже)", reply_markup=markup_reply)
     global status, event
     status, event = "book_table", None
 
@@ -108,7 +108,7 @@ def make_event(message):
     button_phone = telebot.types.KeyboardButton(text="📱 Отправить номер телефона", request_contact=True)
     markup_reply.add(button_phone)
     bot.send_message(message.chat.id, f"Оставьте ваш номер телефона, мы свяжемся с вами и уточним все детали \n"
-                                      f"(через сообщение, либо воспользовавшись формой ниже)",
+                                      f"(отправьте номер в сообщении, либо воспользуйтесь формой ниже)",
                      reply_markup=markup_reply)
     global status, event
     status, event = "make_event", None
@@ -160,25 +160,25 @@ def write_phone(message):
 def get_text(message):
     try:
         global status
-        if "admin" in message.text:
-            to_chat_id, mess_text = message.text[6:].split("#")
+        if message.chat.id == admin_chat_id:
+            to_chat_id, mess_text = message.text.split("#")
             bot.send_message(to_chat_id, mess_text)
 
-        if status is None:
-            bot.send_message(message.chat.id, "Что Вас интересует? Воспользуйтесь кнопкой Меню")
-
         else:
-            text = message.text
-            botdb.add_data(message.from_user.id, datetime.now(), status, text, event)
-            bot.send_message(message.chat.id, "Ваш ответ получен, спасибо!")
+            if status is None:
+                bot.send_message(message.chat.id, "Что Вас интересует? Воспользуйтесь кнопкой Меню")
 
-            bot.send_message(admin_chat_id, f"user {message.from_user.first_name}\n"
-                                            # f"user_id {message.from_user.username}\n"
-                                            f"chat {message.chat.id}\n"
-                                            f"status {status}\n"
-                                            f"text {text}\n"
-                                            f"event {event}")
-            status = None
+            else:
+                text = message.text
+                botdb.add_data(message.from_user.id, datetime.now(), status, text, event)
+                bot.send_message(message.chat.id, "Ваш ответ получен, спасибо!")
+
+                bot.send_message(admin_chat_id, f"user {message.from_user.first_name}\n"
+                                                f"chat {message.chat.id}\n"
+                                                f"status {status}\n"
+                                                f"text {text}\n"
+                                                f"event {event}")
+                status = None
 
     except Exception:
         bot.send_message(message.chat.id, "Что Вас интересует? Воспользуйтесь кнопкой Меню")
