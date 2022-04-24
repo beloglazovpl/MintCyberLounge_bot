@@ -78,9 +78,9 @@ def answer(call):
 def event_schedule(message):
     """Корректировка ближайших мероприятий еженедельно"""
     markup_reply = telebot.types.InlineKeyboardMarkup(row_width=1)
-    event_1 = telebot.types.InlineKeyboardButton(text="Мероприятие 1 (20.04.2022)", callback_data="event_1")
-    event_2 = telebot.types.InlineKeyboardButton(text="Мероприятие 2 (22.04.2022)", callback_data="event_2")
-    event_3 = telebot.types.InlineKeyboardButton(text="Мероприятие 3 (26.04.2022)", callback_data="event_3")
+    event_1 = telebot.types.InlineKeyboardButton(text="Мероприятие 1 (20.04.2022)", callback_data="Мероприятие 1")
+    event_2 = telebot.types.InlineKeyboardButton(text="Мероприятие 2 (22.04.2022)", callback_data="Мероприятие 2")
+    event_3 = telebot.types.InlineKeyboardButton(text="Мероприятие 3 (26.04.2022)", callback_data="Мероприятие 3")
     markup_reply.add(event_1, event_2, event_3)
     bot.send_message(message.chat.id, "Ближайшие мероприятия", reply_markup=markup_reply)
 
